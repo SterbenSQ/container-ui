@@ -3,7 +3,7 @@
 ContainerUI is a native macOS desktop application that provides a graphical user interface for the **`container`** CLI runtime. Think of it as "Docker Desktop" for the Apple container ecosystem — manage containers, images, and system resources from a clean SwiftUI interface.
 
 <p align="center">
-  <img src="Resources/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" alt="ContainerUI" width="128" />
+  <img src="Container-ui.png" alt="ContainerUI" width="128" />
 </p>
 
 ## Features
