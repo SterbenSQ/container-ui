@@ -9,6 +9,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Ensure app appears in Dock and behaves as a regular application
         NSApp.setActivationPolicy(.regular)
+
+        // Set Dock icon from bundled resource
+        if let iconPath = Bundle.module.path(forResource: "Container-ui", ofType: "png"),
+           let icon = NSImage(contentsOfFile: iconPath) {
+            NSApp.applicationIconImage = icon
+        }
+
         NSApp.activate(ignoringOtherApps: true)
     }
 }
