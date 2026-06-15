@@ -1,7 +1,21 @@
 import SwiftUI
+import AppKit
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        true
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Ensure app appears in Dock and behaves as a regular application
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+}
 
 @main
 struct ContainerUIApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var l10n = LocalizationManager.shared
     @StateObject private var dashboardVM = DashboardViewModel()
 
