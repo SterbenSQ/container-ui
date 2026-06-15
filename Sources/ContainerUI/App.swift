@@ -7,6 +7,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Suppress Apple framework debug noise (TSM/IMK) on stderr
+        // Harmless messages from text input system when running outside .app bundle
+        freopen("/dev/null", "w", stderr)
+
         // Ensure app appears in Dock and behaves as a regular application
         NSApp.setActivationPolicy(.regular)
 
