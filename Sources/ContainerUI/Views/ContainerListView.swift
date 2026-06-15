@@ -10,103 +10,126 @@ struct ContainerListView: View {
     @State private var showDeleteAlert = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Toolbar
-            HStack {
-                Text(l10n["container.list.title"])
-                    .font(.largeTitle)
-                    .bold()
+        ZStack {
+            VStack(spacing: 0) {
+                // Toolbar
+                HStack {
+                    Text(l10n["container.list.title"])
+                        .font(.largeTitle)
+                        .bold()
 
-                Spacer()
+                    Spacer()
 
-                Toggle(l10n["container.list.show_all"], isOn: $vm.showAll)
-                    .toggleStyle(.checkbox)
-                    .help(l10n["container.list.show_all"])
+                    Toggle(l10n["container.list.show_all"], isOn: $vm.showAll)
+                        .toggleStyle(.checkbox)
+                        .help(l10n["container.list.show_all"])
 
-                Button {
-                    showingCreateSheet = true
-                } label: {
-                    Label(l10n["container.list.new"], systemImage: "plus")
+                    Button {
+                        showingCreateSheet = true
+                    } label: {
+                        Label(l10n["container.list.new"], systemImage: "plus")
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button {
+                        Task { await vm.refresh() }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .help(l10n["dashboard.refresh"])
                 }
-                .buttonStyle(.borderedProminent)
+                .padding()
 
-                Button {
-                    Task { await vm.refresh() }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
+                // Search bar
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    TextField(l10n["container.list.search"], text: $vm.searchText)
+                        .textFieldStyle(.plain)
                 }
-                .help(l10n["dashboard.refresh"])
-            }
-            .padding()
+                .padding(.horizontal)
+                .padding(.vertical, 8)
 
-            // Search bar
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                TextField(l10n["container.list.search"], text: $vm.searchText)
-                    .textFieldStyle(.plain)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-
-            // Container list
-            List {
-                ForEach(vm.filteredContainers) { container in
-                    ContainerRowView(container: container)
-                        .contextMenu {
-                            contextMenu(for: container)
-                        }
-                        .onTapGesture(count: 2) {
-                            selectedForDetail = container
-                            showingDetail = true
-                        }
-                        .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                confirmDelete = container
-                                showDeleteAlert = true
-                            } label: {
-                                Label(l10n["container.list.delete"], systemImage: "trash")
+                // Container list
+                List {
+                    ForEach(vm.filteredContainers) { container in
+                        ContainerRowView(container: container)
+                            .contextMenu {
+                                contextMenu(for: container)
                             }
-
-                            if container.isRunning {
-                                Button {
-                                    Task { await vm.stopContainer(id: container.id) }
-                                } label: {
-                                    Label(l10n["container.list.stop"], systemImage: "stop.fill")
-                                }
-                                .tint(.orange)
-                            } else {
-                                Button {
-                                    Task { await vm.startContainer(id: container.id) }
-                                } label: {
-                                    Label(l10n["container.list.start"], systemImage: "play.fill")
-                                }
-                                .tint(.green)
+                            .onTapGesture(count: 2) {
+                                selectedForDetail = container
+                                showingDetail = true
                             }
-                        }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    confirmDelete = container
+                                    showDeleteAlert = true
+                                } label: {
+                                    Label(l10n["container.list.delete"], systemImage: "trash")
+                                }
+
+                                if container.isRunning {
+                                    Button {
+                                        Task { await vm.stopContainer(id: container.id) }
+                                    } label: {
+                                        Label(l10n["container.list.stop"], systemImage: "stop.fill")
+                                    }
+                                    .tint(.orange)
+                                } else {
+                                    Button {
+                                        Task { await vm.startContainer(id: container.id) }
+                                    } label: {
+                                        Label(l10n["container.list.start"], systemImage: "play.fill")
+                                    }
+                                    .tint(.green)
+                                }
+                            }
+                    }
+                }
+                .listStyle(.inset)
+            }
+            .overlay {
+                if vm.isLoading && vm.containers.isEmpty {
+                    ProgressView(l10n["dashboard.loading"])
+                } else if vm.filteredContainers.isEmpty && !vm.isLoading {
+                    if vm.searchText.isEmpty {
+                        ContentUnavailableView(
+                            l10n["container.list.empty.title"],
+                            systemImage: "square.stack.3d.down.right",
+                            description: Text(l10n["container.list.empty.desc"])
+                        )
+                    } else {
+                        ContentUnavailableView(
+                            l10n["container.list.empty.title"],
+                            systemImage: "square.stack.3d.down.right",
+                            description: Text(l10n.format("container.list.empty.search", ["text": vm.searchText]))
+                        )
+                    }
                 }
             }
-            .listStyle(.inset)
-        }
-        .overlay {
-            if vm.isLoading && vm.containers.isEmpty {
-                ProgressView(l10n["dashboard.loading"])
-            } else if vm.filteredContainers.isEmpty && !vm.isLoading {
-                if vm.searchText.isEmpty {
-                    ContentUnavailableView(
-                        l10n["container.list.empty.title"],
-                        systemImage: "square.stack.3d.down.right",
-                        description: Text(l10n["container.list.empty.desc"])
-                    )
-                } else {
-                    ContentUnavailableView(
-                        l10n["container.list.empty.title"],
-                        systemImage: "square.stack.3d.down.right",
-                        description: Text(l10n.format("container.list.empty.search", ["text": vm.searchText]))
-                    )
+
+            // Create container overlay — avoids .sheet() focus bug on macOS
+            if showingCreateSheet {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture { showingCreateSheet = false }
+                    .transition(.opacity)
+
+                ContainerCreateView { createdId in
+                    if !createdId.isEmpty {
+                        showingCreateSheet = false
+                        Task { await vm.refresh() }
+                    }
                 }
+                .frame(width: 550, height: 650)
+                .background(.regularMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(radius: 20)
+                .transition(.scale.combined(with: .opacity))
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: showingCreateSheet)
         .alert(l10n["container.list.delete.title"], isPresented: $showDeleteAlert, presenting: confirmDelete) { container in
             Button(l10n["container.list.cancel"], role: .cancel) {}
             Button(l10n["container.list.delete"], role: .destructive) {
@@ -114,15 +137,6 @@ struct ContainerListView: View {
             }
         } message: { container in
             Text(l10n.format("container.list.delete.message", ["name": container.name]))
-        }
-        .sheet(isPresented: $showingCreateSheet) {
-            ContainerCreateView { createdId in
-                if !createdId.isEmpty {
-                    showingCreateSheet = false
-                    Task { await vm.refresh() }
-                }
-            }
-            .frame(width: 550, height: 650)
         }
         .sheet(isPresented: $showingDetail, onDismiss: {
             selectedForDetail = nil
