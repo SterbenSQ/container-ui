@@ -43,11 +43,18 @@ class ContainerListViewModel: ObservableObject {
 
     func refresh() async {
         isLoading = true
-        errorMessage = nil
         do {
             containers = try await service.listContainers(all: true)
+            // Success clears previous error
+            if errorMessage != nil {
+                errorMessage = nil
+            }
         } catch {
-            errorMessage = error.localizedDescription
+            let msg = error.localizedDescription
+            // Only update if the message actually changed — avoids red banner flashing
+            if msg != errorMessage {
+                errorMessage = msg
+            }
         }
         isLoading = false
     }
