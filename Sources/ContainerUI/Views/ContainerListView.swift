@@ -122,7 +122,7 @@ struct ContainerListView: View {
                         Task { await vm.refresh() }
                     }
                 }
-                .frame(width: 550, height: 650)
+                .frame(minWidth: 550, idealWidth: 580, minHeight: 500, idealHeight: 700)
                 .background(.regularMaterial)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(radius: 20)

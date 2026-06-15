@@ -21,196 +21,207 @@ struct ContainerCreateView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                // Basic settings
-                Section(l10n["container.create.basic"]) {
-                    TextField(l10n["container.create.image"], text: $vm.imageName)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: .image)
+        VStack(spacing: 0) {
+            // Title bar
+            HStack {
+                Text(l10n["container.create.title"])
+                    .font(.title2)
+                    .bold()
 
-                    TextField(l10n["container.create.name"], text: $vm.containerName)
-                        .textFieldStyle(.roundedBorder)
-                        .focused($focusedField, equals: .name)
+                Spacer()
 
-                    TextField(l10n["container.create.command"], text: $vm.command)
-                        .textFieldStyle(.roundedBorder)
-                        .help(l10n["container.create.command.hint"])
-                        .focused($focusedField, equals: .command)
+                Button(l10n["container.create.cancel"]) {
+                    dismiss()
                 }
+                .keyboardShortcut(.cancelAction)
 
-                // Resources
-                Section(l10n["container.create.resources"]) {
-                    HStack {
-                        Stepper(l10n.format("container.create.cpus", ["count": "\(vm.cpus)"]), value: $vm.cpus, in: 1...32)
-                            .frame(maxWidth: 220)
+                Button(l10n["container.create.submit"]) {
+                    Task { await vm.create() }
+                }
+                .disabled(vm.imageName.isEmpty || vm.isCreating)
+                .keyboardShortcut(.defaultAction)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 12)
 
-                        Spacer()
+            Divider()
+
+            // Form content
+            ScrollView {
+                Form {
+                    // Basic settings
+                    Section(l10n["container.create.basic"]) {
+                        TextField(l10n["container.create.image"], text: $vm.imageName)
+                            .textFieldStyle(.roundedBorder)
+                            .focused($focusedField, equals: .image)
+
+                        TextField(l10n["container.create.name"], text: $vm.containerName)
+                            .textFieldStyle(.roundedBorder)
+                            .focused($focusedField, equals: .name)
+
+                        TextField(l10n["container.create.command"], text: $vm.command)
+                            .textFieldStyle(.roundedBorder)
+                            .help(l10n["container.create.command.hint"])
+                            .focused($focusedField, equals: .command)
+                    }
+
+                    // Resources
+                    Section(l10n["container.create.resources"]) {
+                        HStack {
+                            Stepper(l10n.format("container.create.cpus", ["count": "\(vm.cpus)"]), value: $vm.cpus, in: 1...32)
+                                .frame(maxWidth: 220)
+
+                            Spacer()
+
+                            HStack {
+                                Text(l10n["container.create.memory"] + ":")
+                                    .font(.caption)
+                                TextField("", text: $vm.memory)
+                                    .textFieldStyle(.roundedBorder)
+                                    .frame(width: 100)
+                            }
+                            Text(l10n["container.create.memory.hint"])
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    // Network
+                    Section(l10n["container.create.network"]) {
+                        TextField(l10n["container.create.network.name"], text: $vm.network)
+                            .textFieldStyle(.roundedBorder)
+
+                        ForEach(vm.ports.indices, id: \.self) { index in
+                            HStack {
+                                TextField(l10n["container.create.port"], text: $vm.ports[index])
+                                    .textFieldStyle(.roundedBorder)
+                                    .font(.caption)
+                                    .monospaced()
+                                Button {
+                                    vm.ports.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
 
                         HStack {
-                            Text(l10n["container.create.memory"] + ":")
-                                .font(.caption)
-                            TextField("", text: $vm.memory)
+                            TextField(l10n["container.create.host_port"], text: $newPortHost)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 100)
-                        }
-                        Text(l10n["container.create.memory.hint"])
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                // Network
-                Section(l10n["container.create.network"]) {
-                    TextField(l10n["container.create.network.name"], text: $vm.network)
-                        .textFieldStyle(.roundedBorder)
-
-                    ForEach(vm.ports.indices, id: \.self) { index in
-                        HStack {
-                            TextField(l10n["container.create.port"], text: $vm.ports[index])
+                            Text(":").foregroundColor(.secondary)
+                            TextField(l10n["container.create.container_port"], text: $newPortContainer)
                                 .textFieldStyle(.roundedBorder)
-                                .font(.caption)
-                                .monospaced()
+                                .frame(width: 100)
                             Button {
-                                vm.ports.remove(at: index)
+                                let spec = "\(newPortHost):\(newPortContainer)"
+                                if !newPortHost.isEmpty && !newPortContainer.isEmpty {
+                                    vm.ports.append(spec)
+                                    newPortHost = ""
+                                    newPortContainer = ""
+                                }
                             } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.green)
                             }
                             .buttonStyle(.plain)
+                            .disabled(newPortHost.isEmpty || newPortContainer.isEmpty)
                         }
                     }
 
-                    HStack {
-                        TextField(l10n["container.create.host_port"], text: $newPortHost)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 100)
-                        Text(":").foregroundColor(.secondary)
-                        TextField(l10n["container.create.container_port"], text: $newPortContainer)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 100)
-                        Button {
-                            let spec = "\(newPortHost):\(newPortContainer)"
-                            if !newPortHost.isEmpty && !newPortContainer.isEmpty {
-                                vm.ports.append(spec)
-                                newPortHost = ""
-                                newPortContainer = ""
+                    // Volumes
+                    Section(l10n["container.create.volumes"]) {
+                        ForEach(vm.volumes.indices, id: \.self) { index in
+                            HStack {
+                                TextField(l10n["container.create.volume.path"], text: $vm.volumes[index])
+                                    .textFieldStyle(.roundedBorder)
+                                    .font(.caption)
+                                    .monospaced()
+                                Button {
+                                    vm.volumes.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.plain)
                             }
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
                         }
-                        .buttonStyle(.plain)
-                        .disabled(newPortHost.isEmpty || newPortContainer.isEmpty)
-                    }
-                }
 
-                // Volumes
-                Section(l10n["container.create.volumes"]) {
-                    ForEach(vm.volumes.indices, id: \.self) { index in
                         HStack {
-                            TextField(l10n["container.create.volume.path"], text: $vm.volumes[index])
+                            TextField(l10n["container.create.host_path"], text: $newVolumeHost)
                                 .textFieldStyle(.roundedBorder)
-                                .font(.caption)
-                                .monospaced()
+                            Text(":").foregroundColor(.secondary)
+                            TextField(l10n["container.create.container_path"], text: $newVolumeContainer)
+                                .textFieldStyle(.roundedBorder)
                             Button {
-                                vm.volumes.remove(at: index)
+                                if !newVolumeHost.isEmpty && !newVolumeContainer.isEmpty {
+                                    vm.volumes.append("\(newVolumeHost):\(newVolumeContainer)")
+                                    newVolumeHost = ""
+                                    newVolumeContainer = ""
+                                }
                             } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.green)
                             }
                             .buttonStyle(.plain)
+                            .disabled(newVolumeHost.isEmpty || newVolumeContainer.isEmpty)
                         }
                     }
 
-                    HStack {
-                        TextField(l10n["container.create.host_path"], text: $newVolumeHost)
-                            .textFieldStyle(.roundedBorder)
-                        Text(":").foregroundColor(.secondary)
-                        TextField(l10n["container.create.container_path"], text: $newVolumeContainer)
-                            .textFieldStyle(.roundedBorder)
-                        Button {
-                            if !newVolumeHost.isEmpty && !newVolumeContainer.isEmpty {
-                                vm.volumes.append("\(newVolumeHost):\(newVolumeContainer)")
-                                newVolumeHost = ""
-                                newVolumeContainer = ""
+                    // Environment Variables
+                    Section(l10n["container.create.env"]) {
+                        ForEach(vm.envVars.indices, id: \.self) { index in
+                            HStack {
+                                TextField(l10n["container.create.env.entry"], text: $vm.envVars[index])
+                                    .textFieldStyle(.roundedBorder)
+                                    .font(.caption)
+                                    .monospaced()
+                                Button {
+                                    vm.envVars.remove(at: index)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.plain)
                             }
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
                         }
-                        .buttonStyle(.plain)
-                        .disabled(newVolumeHost.isEmpty || newVolumeContainer.isEmpty)
-                    }
-                }
 
-                // Environment Variables
-                Section(l10n["container.create.env"]) {
-                    ForEach(vm.envVars.indices, id: \.self) { index in
                         HStack {
-                            TextField(l10n["container.create.env.entry"], text: $vm.envVars[index])
+                            TextField("KEY", text: $newEnvKey)
                                 .textFieldStyle(.roundedBorder)
-                                .font(.caption)
-                                .monospaced()
+                                .frame(width: 120)
+                            Text("=").foregroundColor(.secondary)
+                            TextField("VALUE", text: $newEnvValue)
+                                .textFieldStyle(.roundedBorder)
                             Button {
-                                vm.envVars.remove(at: index)
+                                if !newEnvKey.isEmpty {
+                                    vm.envVars.append("\(newEnvKey)=\(newEnvValue)")
+                                    newEnvKey = ""
+                                    newEnvValue = ""
+                                }
                             } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundColor(.red)
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.green)
                             }
                             .buttonStyle(.plain)
+                            .disabled(newEnvKey.isEmpty)
                         }
                     }
 
-                    HStack {
-                        TextField("KEY", text: $newEnvKey)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 120)
-                        Text("=").foregroundColor(.secondary)
-                        TextField("VALUE", text: $newEnvValue)
-                            .textFieldStyle(.roundedBorder)
-                        Button {
-                            if !newEnvKey.isEmpty {
-                                vm.envVars.append("\(newEnvKey)=\(newEnvValue)")
-                                newEnvKey = ""
-                                newEnvValue = ""
-                            }
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(newEnvKey.isEmpty)
+                    // Options
+                    Section(l10n["container.create.options"]) {
+                        Toggle(l10n["container.create.rosetta"], isOn: $vm.rosetta)
+                        Toggle(l10n["container.create.ssh"], isOn: $vm.ssh)
+                        Toggle(l10n["container.create.readonly"], isOn: $vm.readOnly)
                     }
                 }
-
-                // Options
-                Section(l10n["container.create.options"]) {
-                    Toggle(l10n["container.create.rosetta"], isOn: $vm.rosetta)
-                    Toggle(l10n["container.create.ssh"], isOn: $vm.ssh)
-                    Toggle(l10n["container.create.readonly"], isOn: $vm.readOnly)
-                }
-            }
-            .formStyle(.grouped)
-            .navigationTitle(l10n["container.create.title"])
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(l10n["container.create.cancel"]) {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(l10n["container.create.submit"]) {
-                        Task { await vm.create() }
-                    }
-                    .disabled(vm.imageName.isEmpty || vm.isCreating)
-                }
+                .formStyle(.grouped)
             }
         }
         .onAppear {
-            // Fix: ensure the sheet window becomes key so TextFields accept input
             DispatchQueue.main.async {
-                NSApp.activate(ignoringOtherApps: true)
                 focusedField = .image
             }
         }
