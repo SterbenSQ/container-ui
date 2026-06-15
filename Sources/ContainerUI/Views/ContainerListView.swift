@@ -121,6 +121,8 @@ struct ContainerListView: View {
                         showingCreateSheet = false
                         Task { await vm.refresh() }
                     }
+                } onCancel: {
+                    showingCreateSheet = false
                 }
                 .frame(minWidth: 550, idealWidth: 580, minHeight: 500, idealHeight: 700)
                 .background(.regularMaterial)

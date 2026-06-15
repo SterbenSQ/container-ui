@@ -4,8 +4,8 @@ import AppKit
 struct ContainerCreateView: View {
     @EnvironmentObject var l10n: LocalizationManager
     @StateObject private var vm = ContainerCreateViewModel()
-    @Environment(\.dismiss) private var dismiss
     let onCreated: (String) -> Void
+    let onCancel: () -> Void
 
     @State private var newEnvKey = ""
     @State private var newEnvValue = ""
@@ -31,7 +31,7 @@ struct ContainerCreateView: View {
                 Spacer()
 
                 Button(l10n["container.create.cancel"]) {
-                    dismiss()
+                    onCancel()
                 }
                 .keyboardShortcut(.cancelAction)
 
@@ -242,7 +242,7 @@ struct ContainerCreateView: View {
         .onChange(of: vm.createdId) { _, newId in
             if let id = newId, !id.isEmpty {
                 onCreated(id)
-                dismiss()
+                onCancel()
             }
         }
         .alert(l10n["container.create.error.title"], isPresented: .init(
