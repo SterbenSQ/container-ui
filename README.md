@@ -176,4 +176,4 @@ ContainerUI/
 
 ## License
 
-This project is maintained by [SterbenSQ](https://github.com/SterbenSQ). License information to be added.
+[MIT](LICENSE) © 2026 [SterbenSQ](https://github.com/SterbenSQ)
