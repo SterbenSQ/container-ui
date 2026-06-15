@@ -122,6 +122,7 @@ struct ContainerListView: View {
                     Task { await vm.refresh() }
                 }
             }
+            .frame(width: 550, height: 650)
         }
         .sheet(isPresented: $showingDetail, onDismiss: {
             selectedForDetail = nil

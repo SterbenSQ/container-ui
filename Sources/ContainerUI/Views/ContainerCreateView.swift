@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ContainerCreateView: View {
     @EnvironmentObject var l10n: LocalizationManager
@@ -13,6 +14,12 @@ struct ContainerCreateView: View {
     @State private var newVolumeHost = ""
     @State private var newVolumeContainer = ""
 
+    @FocusState private var focusedField: Field?
+
+    enum Field: Hashable {
+        case image, name, command
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -20,13 +27,16 @@ struct ContainerCreateView: View {
                 Section(l10n["container.create.basic"]) {
                     TextField(l10n["container.create.image"], text: $vm.imageName)
                         .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .image)
 
                     TextField(l10n["container.create.name"], text: $vm.containerName)
                         .textFieldStyle(.roundedBorder)
+                        .focused($focusedField, equals: .name)
 
                     TextField(l10n["container.create.command"], text: $vm.command)
                         .textFieldStyle(.roundedBorder)
                         .help(l10n["container.create.command.hint"])
+                        .focused($focusedField, equals: .command)
                 }
 
                 // Resources
@@ -195,6 +205,13 @@ struct ContainerCreateView: View {
                     }
                     .disabled(vm.imageName.isEmpty || vm.isCreating)
                 }
+            }
+        }
+        .onAppear {
+            // Fix: ensure the sheet window becomes key so TextFields accept input
+            DispatchQueue.main.async {
+                NSApp.activate(ignoringOtherApps: true)
+                focusedField = .image
             }
         }
         .overlay {
