@@ -9,13 +9,23 @@ class ImageListViewModel: ObservableObject {
 
     @Published var pullReference = ""
     @Published var isPulling = false
-    @Published var pullResult: String?
+    @Published var pullingImages: [String] = [] // references being pulled
 
     private let service = ContainerService.shared
 
     var filteredImages: [ImageListItemModel] {
-        if searchText.isEmpty { return images }
-        return images.filter {
+        var result = images
+
+        // Show pulling placeholders at top
+        for ref in pullingImages {
+            let placeholder = ImageListItemModel.placeholder(reference: ref)
+            if !result.contains(where: { $0.id == placeholder.id }) {
+                result.insert(placeholder, at: 0)
+            }
+        }
+
+        if searchText.isEmpty { return result }
+        return result.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
         }
     }
@@ -41,20 +51,24 @@ class ImageListViewModel: ObservableObject {
     }
 
     func pullImage() async {
-        guard !pullReference.isEmpty else {
+        let ref = pullReference.trimmingCharacters(in: .whitespaces)
+        guard !ref.isEmpty else {
             errorMessage = "Please enter an image reference."
             return
         }
         isPulling = true
         errorMessage = nil
-        pullResult = nil
+        pullReference = ""
+        pullingImages.append(ref)
+
         do {
-            try await service.pullImage(reference: pullReference)
-            pullResult = "Successfully pulled \(pullReference)"
-            pullReference = ""
+            try await service.pullImage(reference: ref)
+            pullingImages.removeAll { $0 == ref }
             await refresh()
         } catch {
+            pullingImages.removeAll { $0 == ref }
             errorMessage = error.localizedDescription
+            await refresh()
         }
         isPulling = false
     }

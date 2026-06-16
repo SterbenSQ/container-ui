@@ -45,29 +45,6 @@ struct ImageListView: View {
             .padding(.horizontal)
             .padding(.bottom, 8)
 
-            if vm.isPulling {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text(l10n["image.list.pull.pulling"])
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-            }
-
-            if let result = vm.pullResult {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                    Text(result)
-                        .font(.caption)
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-            }
-
             // Search
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -83,19 +60,23 @@ struct ImageListView: View {
                 ForEach(vm.filteredImages) { image in
                     ImageRowView(image: image)
                         .contextMenu {
-                            Button(role: .destructive) {
-                                confirmDelete = image
-                                showDeleteAlert = true
-                            } label: {
-                                Label(l10n["image.list.delete"], systemImage: "trash")
+                            if !image.isPlaceholder {
+                                Button(role: .destructive) {
+                                    confirmDelete = image
+                                    showDeleteAlert = true
+                                } label: {
+                                    Label(l10n["image.list.delete"], systemImage: "trash")
+                                }
                             }
                         }
                         .swipeActions(edge: .trailing) {
-                            Button(role: .destructive) {
-                                confirmDelete = image
-                                showDeleteAlert = true
-                            } label: {
-                                Label(l10n["image.list.delete"], systemImage: "trash")
+                            if !image.isPlaceholder {
+                                Button(role: .destructive) {
+                                    confirmDelete = image
+                                    showDeleteAlert = true
+                                } label: {
+                                    Label(l10n["image.list.delete"], systemImage: "trash")
+                                }
                             }
                         }
                 }
