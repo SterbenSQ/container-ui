@@ -1,6 +1,8 @@
 # ContainerUI
 
-ContainerUI is a native macOS desktop application that provides a graphical user interface for the **`container`** CLI runtime. Think of it as "Docker Desktop" for the Apple container ecosystem — manage containers, images, and system resources from a clean SwiftUI interface.
+ContainerUI is a native macOS desktop application that provides a graphical user interface for the **[`container`](https://github.com/apple/container)** CLI runtime — Apple's container engine for macOS. Think of it as "Docker Desktop" for the Apple container ecosystem: manage containers, images, and system resources from a clean SwiftUI interface.
+
+> **Why `container`?** ContainerUI is a GUI frontend. It does **not** run containers itself. All container operations — creating, starting, stopping, building images — are delegated to the [`apple/container`](https://github.com/apple/container) CLI installed at `/usr/local/bin/container`. Without it, ContainerUI cannot function.
 
 [中文文档](README_zh.md)
 
@@ -18,7 +20,8 @@ ContainerUI is a native macOS desktop application that provides a graphical user
 
 ### Container Management
 - **List & Search** — browse all containers with real-time status indicators, filter by running state, and search by name or image
-- **Lifecycle Controls** — start, stop, kill, and delete containers with swipe actions and context menus
+- **Lifecycle Controls** — start, stop, kill, and delete containers with swipe actions, in-row buttons, and context menus
+- **CLI Terminal** — execute commands inside a running container via a built-in terminal interface
 - **Detailed Inspect** — view full container configuration including ports, mounts, environment variables, labels, and network settings
 - **Live Stats** — CPU, memory, I/O, and network usage with 2-second auto-refresh
 - **Logs** — scrollable, monospaced log viewer for container output
@@ -34,11 +37,12 @@ ContainerUI is a native macOS desktop application that provides a graphical user
 
 ### Image Management
 - **List & Search** — browse local images with platform badges, sizes, and creation dates
-- **Pull** — pull images from remote registries by reference
+- **Pull** — pull images from remote registries by reference, with in-list progress and retry on failure
 - **Delete** — remove unused images with swipe-to-delete
 
 ### Image Building
 - Select a build context directory via native file picker
+- Optionally specify a Dockerfile path (`-f` flag)
 - Tag the resulting image
 - Watch build output in real time
 
@@ -54,13 +58,21 @@ ContainerUI is a native macOS desktop application that provides a graphical user
 | **macOS** | 26 or later |
 | **Swift** | 6.0 |
 | **Xcode** | 16.0+ (recommended) |
-| **Container CLI** | `/usr/local/bin/container` |
+| **[`container`](https://github.com/apple/container)** | installed at `/usr/local/bin/container` |
 
-> **Important**: ContainerUI depends on the `container` CLI runtime being installed at `/usr/local/bin/container`. The app will display an error if the binary is not found.
+> **Important**: The `container` CLI is a **required dependency**. ContainerUI invokes it via subprocess for every operation. If the binary is not found at `/usr/local/bin/container`, the app will display an error and all functionality will be unavailable.
 
 ## Installation
 
-### Build from Source
+### 1. Install `container` CLI
+
+```bash
+# Follow the instructions at https://github.com/apple/container
+# Ensure the binary is at /usr/local/bin/container
+which container
+```
+
+### 2. Build ContainerUI from Source
 
 ```bash
 # Clone the repository
@@ -141,6 +153,7 @@ ContainerUI/
 │       │   ├── ContainerListViewModel.swift
 │       │   ├── ContainerDetailViewModel.swift
 │       │   ├── ContainerCreateViewModel.swift
+│       │   ├── ContainerExecViewModel.swift
 │       │   ├── ImageListViewModel.swift
 │       │   └── ImageBuildViewModel.swift
 │       ├── Views/                  # SwiftUI views
@@ -149,6 +162,7 @@ ContainerUI/
 │       │   ├── ContainerRowView.swift
 │       │   ├── ContainerDetailView.swift
 │       │   ├── ContainerCreateView.swift
+│       │   ├── ContainerExecView.swift
 │       │   ├── ImageListView.swift
 │       │   ├── ImageRowView.swift
 │       │   └── ImageBuildView.swift
@@ -172,9 +186,9 @@ ContainerUI/
 | Tab | Purpose |
 |-----|---------|
 | **Dashboard** | System status, disk usage, version |
-| **Containers** | List, create, manage containers |
+| **Containers** | List, create, manage, exec into containers |
 | **Images** | List, pull, delete images |
-| **Build** | Build images from a directory |
+| **Build** | Build images from directory or Dockerfile |
 
 ## License
 
