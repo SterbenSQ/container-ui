@@ -58,7 +58,12 @@ struct ImageListView: View {
             // Image list
             List {
                 ForEach(vm.filteredImages) { image in
-                    ImageRowView(image: image)
+                    ImageRowView(
+                        image: image,
+                        pullState: vm.pullState(for: image),
+                        onRetry: image.isPlaceholder ? { Task { await vm.retryPull(reference: image.name) } } : nil,
+                        onRemove: image.isPlaceholder ? { vm.removeFailedPull(reference: image.name) } : nil
+                    )
                         .contextMenu {
                             if !image.isPlaceholder {
                                 Button(role: .destructive) {
