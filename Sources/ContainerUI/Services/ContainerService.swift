@@ -326,6 +326,10 @@ actor ContainerService {
         return try await executeString(args: args)
     }
 
+    func exec(containerId: String, command: [String]) async throws -> String {
+        try await executeString(args: ["exec", containerId] + command)
+    }
+
     // MARK: - Images
 
     func listImages() async throws -> [ImageListItemModel] {

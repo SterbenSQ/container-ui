@@ -104,6 +104,8 @@
   "container.detail.logs.empty": "暂无日志。",
   "container.detail.logs.refresh": "刷新日志",
   "container.detail.error": "错误",
+  "container.exec.hint": "在容器内执行命令",
+  "container.exec.title": "{name} — CLI",
 
   "image.list.title": "镜像",
   "image.list.pull": "拉取",

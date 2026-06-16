@@ -5,7 +5,9 @@ struct ContainerListView: View {
     @StateObject private var vm = ContainerListViewModel()
     @State private var showingCreateSheet = false
     @State private var showingDetail = false
+    @State private var showingExec = false
     @State private var selectedForDetail: ContainerListItemModel?
+    @State private var selectedForExec: ContainerListItemModel?
     @State private var confirmDelete: ContainerListItemModel?
     @State private var showDeleteAlert = false
 
@@ -57,13 +59,18 @@ struct ContainerListView: View {
                             confirmDelete = container
                             showDeleteAlert = true
                         }
-                            .contextMenu {
-                                contextMenu(for: container)
-                            }
-                            .onTapGesture(count: 2) {
-                                selectedForDetail = container
-                                showingDetail = true
-                            }
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedForExec = container
+                            showingExec = true
+                        }
+                        .contextMenu {
+                            contextMenu(for: container)
+                        }
+                        .onTapGesture(count: 2) {
+                            selectedForDetail = container
+                            showingDetail = true
+                        }
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     confirmDelete = container
@@ -148,6 +155,14 @@ struct ContainerListView: View {
         }) {
             if let container = selectedForDetail {
                 ContainerDetailView(containerId: container.id)
+            }
+        }
+        .sheet(isPresented: $showingExec, onDismiss: {
+            selectedForExec = nil
+        }) {
+            if let container = selectedForExec {
+                ContainerExecView(containerId: container.id, containerName: container.name)
+                    .frame(width: 700, height: 500)
             }
         }
         .task {

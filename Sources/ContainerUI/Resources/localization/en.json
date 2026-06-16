@@ -104,6 +104,8 @@
   "container.detail.logs.empty": "No logs available.",
   "container.detail.logs.refresh": "Refresh logs",
   "container.detail.error": "Error",
+  "container.exec.hint": "Execute commands inside the container",
+  "container.exec.title": "{name} — CLI",
 
   "image.list.title": "Images",
   "image.list.pull": "Pull",
