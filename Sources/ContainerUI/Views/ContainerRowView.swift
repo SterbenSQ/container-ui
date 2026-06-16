@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContainerRowView: View {
     let container: ContainerListItemModel
+    var onDelete: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 12) {
@@ -44,6 +45,19 @@ struct ContainerRowView: View {
             Text(container.created, style: .date)
                 .font(.caption)
                 .foregroundColor(.secondary)
+
+            // Delete button
+            if let onDelete = onDelete {
+                Button {
+                    onDelete()
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+                .help("Delete container")
+            }
         }
         .padding(.vertical, 4)
     }

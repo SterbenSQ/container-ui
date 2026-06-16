@@ -53,7 +53,10 @@ struct ContainerListView: View {
                 // Container list
                 List {
                     ForEach(vm.filteredContainers) { container in
-                        ContainerRowView(container: container)
+                        ContainerRowView(container: container) {
+                            confirmDelete = container
+                            showDeleteAlert = true
+                        }
                             .contextMenu {
                                 contextMenu(for: container)
                             }
