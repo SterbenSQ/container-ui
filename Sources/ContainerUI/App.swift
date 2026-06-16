@@ -14,10 +14,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Ensure app appears in Dock and behaves as a regular application
         NSApp.setActivationPolicy(.regular)
 
-        // Set Dock icon from bundled resource
+        // Set Dock icon from bundled resource, resized to standard 256x256
         if let iconPath = Bundle.module.path(forResource: "Container-ui", ofType: "png"),
-           let icon = NSImage(contentsOfFile: iconPath) {
-            NSApp.applicationIconImage = icon
+           let rawIcon = NSImage(contentsOfFile: iconPath) {
+            let iconSize = NSSize(width: 256, height: 256)
+            let resized = NSImage(size: iconSize)
+            resized.lockFocus()
+            rawIcon.draw(in: NSRect(origin: .zero, size: iconSize),
+                         from: NSRect(origin: .zero, size: rawIcon.size),
+                         operation: .copy, fraction: 1.0)
+            resized.unlockFocus()
+            NSApp.applicationIconImage = resized
         }
 
         NSApp.activate(ignoringOtherApps: true)
