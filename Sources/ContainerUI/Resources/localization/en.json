@@ -134,6 +134,9 @@
   "image.build.error.title": "Error",
   "image.build.error.dir": "Please select a build directory.",
   "image.build.error.tag": "Please enter an image tag.",
+  "image.build.dockerfile": "Dockerfile (Optional)",
+  "image.build.select.dockerfile": "Select Dockerfile",
+  "image.build.dockerfile.hint": "Auto-detect from build context",
 
   "common.error": "Error",
   "common.ok": "OK",

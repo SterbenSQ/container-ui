@@ -5,6 +5,7 @@ import AppKit
 class ImageBuildViewModel: ObservableObject {
     @Published var tag = ""
     @Published var selectedDirectory: String?
+    @Published var selectedDockerfile: String?
     @Published var buildLog: String = ""
     @Published var isBuilding = false
     @Published var isComplete = false
@@ -17,12 +18,17 @@ class ImageBuildViewModel: ObservableObject {
         return URL(fileURLWithPath: path).lastPathComponent
     }
 
+    var dockerfileName: String? {
+        guard let path = selectedDockerfile else { return nil }
+        return URL(fileURLWithPath: path).lastPathComponent
+    }
+
     func selectDirectory() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.message = "Select directory with Dockerfile or Containerfile"
+        panel.message = "Select build context directory"
 
         let response = panel.runModal()
         if response == .OK, let url = panel.url {
@@ -30,9 +36,23 @@ class ImageBuildViewModel: ObservableObject {
         }
     }
 
+    func selectDockerfile() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [] // any file
+        panel.message = "Select Dockerfile"
+
+        let response = panel.runModal()
+        if response == .OK, let url = panel.url {
+            selectedDockerfile = url.path
+        }
+    }
+
     func build() async {
         guard let dir = selectedDirectory else {
-            errorMessage = "Please select a build directory."
+            errorMessage = "Please select a build context directory."
             return
         }
         guard !tag.isEmpty else {
@@ -46,7 +66,7 @@ class ImageBuildViewModel: ObservableObject {
         buildLog = "\(tr("image.build.building"))\n"
 
         do {
-            _ = try await service.buildImage(tag: tag, directory: dir)
+            _ = try await service.buildImage(tag: tag, directory: dir, dockerfile: selectedDockerfile)
             buildLog += "\(tr("image.build.success", ["tag": tag]))\n"
             isComplete = true
         } catch {
@@ -59,6 +79,7 @@ class ImageBuildViewModel: ObservableObject {
     func reset() {
         tag = ""
         selectedDirectory = nil
+        selectedDockerfile = nil
         buildLog = ""
         isBuilding = false
         isComplete = false

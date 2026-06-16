@@ -340,7 +340,12 @@ actor ContainerService {
         try await executeString(args: ["image", "rm", reference])
     }
 
-    func buildImage(tag: String, directory: String) async throws -> String {
-        try await executeString(args: ["build", "-t", tag, directory])
+    func buildImage(tag: String, directory: String, dockerfile: String? = nil) async throws -> String {
+        var args = ["build", "-t", tag]
+        if let df = dockerfile {
+            args.append(contentsOf: ["-f", df])
+        }
+        args.append(directory)
+        return try await executeString(args: args)
     }
 }

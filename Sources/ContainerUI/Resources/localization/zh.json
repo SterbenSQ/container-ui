@@ -134,6 +134,9 @@
   "image.build.error.title": "错误",
   "image.build.error.dir": "请选择构建目录。",
   "image.build.error.tag": "请输入镜像标签。",
+  "image.build.dockerfile": "Dockerfile（可选）",
+  "image.build.select.dockerfile": "选择 Dockerfile",
+  "image.build.dockerfile.hint": "从构建上下文自动检测",
 
   "common.error": "错误",
   "common.ok": "确定",

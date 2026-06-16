@@ -7,6 +7,7 @@ struct ImageBuildView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // Build context directory
                 Section(l10n["image.build.settings"]) {
                     HStack {
                         TextField(l10n["image.build.tag"], text: $vm.tag)
@@ -40,6 +41,38 @@ struct ImageBuildView: View {
                     .padding(8)
                     .background(Color(nsColor: .controlBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+
+                // Dockerfile (optional)
+                Section(l10n["image.build.dockerfile"]) {
+                    HStack {
+                        Button {
+                            vm.selectDockerfile()
+                        } label: {
+                            Label(l10n["image.build.select.dockerfile"], systemImage: "doc.text")
+                        }
+                        .buttonStyle(.bordered)
+
+                        if let name = vm.dockerfileName {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text(name)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Button {
+                                vm.selectedDockerfile = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            Text(l10n["image.build.dockerfile.hint"])
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
 
                 Section(l10n["image.build.log"]) {
