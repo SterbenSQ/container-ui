@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "ContainerUI",
     platforms: [
-        .macOS(.v15),
+        .macOS("26"),
     ],
     dependencies: [],
     targets: [

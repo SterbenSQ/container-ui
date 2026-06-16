@@ -51,7 +51,7 @@ ContainerUI is a native macOS desktop application that provides a graphical user
 
 | Requirement | Version |
 |-------------|---------|
-| **macOS** | 15.0 (Sequoia) or later |
+| **macOS** | 26 or later |
 | **Swift** | 6.0 |
 | **Xcode** | 16.0+ (recommended) |
 | **Container CLI** | `/usr/local/bin/container` |
@@ -124,7 +124,7 @@ ContainerUI follows the **MVVM** (Model-View-ViewModel) pattern built entirely w
 
 ```
 ContainerUI/
-├── Package.swift                    # SPM manifest (macOS 15+, Swift 6.0)
+├── Package.swift                    # SPM manifest (macOS 26+, Swift 6.0)
 ├── Sources/
 │   └── ContainerUI/
 │       ├── App.swift                # @main entry point
