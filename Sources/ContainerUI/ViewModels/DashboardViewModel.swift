@@ -9,7 +9,9 @@ class DashboardViewModel: ObservableObject {
     @Published var containerCount: Int = 0
     @Published var imageCount: Int = 0
     @Published var isLoading = false
+    @Published var isPruning = false
     @Published var errorMessage: String?
+    @Published var pruneResult: String?
 
     private let service = ContainerService.shared
 
@@ -71,7 +73,30 @@ class DashboardViewModel: ObservableObject {
         }
     }
 
+    func pruneSystem() async {
+        isPruning = true
+        errorMessage = nil
+        pruneResult = nil
+        do {
+            let result = try await service.systemPrune()
+            pruneResult = result.reclaimedFormatted
+            await refresh()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isPruning = false
+    }
+
     var isRunning: Bool {
         systemStatus?.status == "running"
+    }
+
+    var totalReclaimable: Int64 {
+        guard let usage = diskUsage else { return 0 }
+        return usage.images.reclaimable + usage.containers.reclaimable + usage.volumes.reclaimable
+    }
+
+    var totalReclaimableFormatted: String {
+        ByteCountFormatter.string(fromByteCount: totalReclaimable, countStyle: .file)
     }
 }

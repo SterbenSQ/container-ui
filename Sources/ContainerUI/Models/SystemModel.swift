@@ -67,3 +67,16 @@ struct ResourceUsageModel: Decodable {
         ByteCountFormatter.string(fromByteCount: reclaimable, countStyle: .file)
     }
 }
+
+// MARK: - Prune Result (from `system prune --format json`)
+
+struct SystemPruneResult: Decodable {
+    let reclaimedSpace: Int64?
+    let imagesDeleted: Int?
+    let containersDeleted: Int?
+
+    var reclaimedFormatted: String {
+        guard let bytes = reclaimedSpace, bytes > 0 else { return "0 KB" }
+        return ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+    }
+}

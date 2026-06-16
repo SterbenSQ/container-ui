@@ -135,6 +135,10 @@ actor ContainerService {
         try await executeJSON(DiskUsageModel.self, args: ["system", "df", "--format", "json"])
     }
 
+    func systemPrune() async throws -> SystemPruneResult {
+        try await executeJSON(SystemPruneResult.self, args: ["system", "prune", "--format", "json"])
+    }
+
     func systemVersion() async throws -> [VersionModel] {
         try await executeJSON([VersionModel].self, args: ["system", "version", "--format", "json"])
     }

@@ -177,8 +177,43 @@ struct DashboardView: View {
 
     private func diskUsageSection(usage: DiskUsageModel) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(l10n["dashboard.disk.usage"])
-                .font(.headline)
+            HStack {
+                Text(l10n["dashboard.disk.usage"])
+                    .font(.headline)
+                Spacer()
+
+                // Reclaim button
+                if vm.totalReclaimable > 0 {
+                    if vm.isPruning {
+                        HStack(spacing: 4) {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                            Text(l10n["dashboard.pruning"])
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    } else {
+                        Button {
+                            Task { await vm.pruneSystem() }
+                        } label: {
+                            Label(l10n.format("dashboard.reclaim.button", ["size": vm.totalReclaimableFormatted]),
+                                  systemImage: "arrow.3.trianglepath")
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.orange)
+                    }
+                }
+
+                if let result = vm.pruneResult {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text(l10n.format("dashboard.reclaimed", ["size": result]))
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+                }
+            }
 
             HStack(spacing: 16) {
                 diskUsageCard(title: l10n["dashboard.images"], usage: usage.images, color: .purple)

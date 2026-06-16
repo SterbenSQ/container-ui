@@ -27,6 +27,9 @@
   "dashboard.versions": "版本信息",
   "dashboard.active_total": "{active} 活跃 / {total} 总计",
   "dashboard.reclaimable": "{size} 可回收",
+  "dashboard.reclaim.button": "回收 {size}",
+  "dashboard.pruning": "清理中...",
+  "dashboard.reclaimed": "已回收 {size}",
 
   "container.list.title": "容器",
   "container.list.show_all": "显示全部",

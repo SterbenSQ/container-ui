@@ -27,6 +27,9 @@
   "dashboard.versions": "Versions",
   "dashboard.active_total": "{active} active / {total} total",
   "dashboard.reclaimable": "{size} reclaimable",
+  "dashboard.reclaim.button": "Reclaim {size}",
+  "dashboard.pruning": "Cleaning up...",
+  "dashboard.reclaimed": "Reclaimed {size}",
 
   "container.list.title": "Containers",
   "container.list.show_all": "Show All",
