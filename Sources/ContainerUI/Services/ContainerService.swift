@@ -151,11 +151,11 @@ actor ContainerService {
             imagesDeleted += imgResult.itemsDeleted ?? 0
         } catch { }
 
-        // Containers: container container prune
+        // Containers: container prune
         do {
             let ctrResult: PruneResult = try await executeJSON(
                 PruneResult.self,
-                args: ["container", "prune", "--format", "json"]
+                args: ["prune", "--format", "json"]
             )
             totalReclaimed += ctrResult.reclaimedSpace ?? 0
             containersDeleted += ctrResult.itemsDeleted ?? 0
