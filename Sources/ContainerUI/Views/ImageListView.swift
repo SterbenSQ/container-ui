@@ -118,18 +118,13 @@ struct ImageListView: View {
         .task {
             await vm.refresh()
         }
-        .overlay(alignment: .bottom) {
-            if let error = vm.errorMessage {
-                Text(error)
-                    .font(.caption)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.red.opacity(0.8))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .padding()
-                    .transition(.move(edge: .bottom))
-                    .onTapGesture { vm.errorMessage = nil }
-            }
+        .alert(l10n["common.error"], isPresented: .init(
+            get: { vm.errorMessage != nil },
+            set: { if !$0 { vm.errorMessage = nil } }
+        )) {
+            Button(l10n["common.ok"], role: .cancel) {}
+        } message: {
+            Text(vm.errorMessage ?? "")
         }
     }
 }

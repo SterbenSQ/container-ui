@@ -104,21 +104,13 @@ struct DashboardView: View {
                 ProgressView(l10n["dashboard.loading"])
             }
         }
-        .overlay(alignment: .bottom) {
-            if let error = vm.errorMessage {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                    Text(error)
-                        .font(.caption)
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(Color.red.opacity(0.9))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .padding()
-                .transition(.move(edge: .bottom))
-                .onTapGesture { vm.errorMessage = nil }
-            }
+        .alert(l10n["common.error"], isPresented: .init(
+            get: { vm.errorMessage != nil },
+            set: { if !$0 { vm.errorMessage = nil } }
+        )) {
+            Button(l10n["common.ok"], role: .cancel) {}
+        } message: {
+            Text(vm.errorMessage ?? "")
         }
     }
 
