@@ -136,7 +136,45 @@ actor ContainerService {
     }
 
     func systemPrune() async throws -> SystemPruneResult {
-        try await executeJSON(SystemPruneResult.self, args: ["system", "prune", "--format", "json"])
+        // Run separate prune commands and aggregate
+        var totalReclaimed: Int64 = 0
+        var imagesDeleted = 0
+        var containersDeleted = 0
+
+        // Images: container image prune --all
+        do {
+            let imgResult: PruneResult = try await executeJSON(
+                PruneResult.self,
+                args: ["image", "prune", "--all", "--format", "json"]
+            )
+            totalReclaimed += imgResult.reclaimedSpace ?? 0
+            imagesDeleted += imgResult.itemsDeleted ?? 0
+        } catch { }
+
+        // Containers: container container prune
+        do {
+            let ctrResult: PruneResult = try await executeJSON(
+                PruneResult.self,
+                args: ["container", "prune", "--format", "json"]
+            )
+            totalReclaimed += ctrResult.reclaimedSpace ?? 0
+            containersDeleted += ctrResult.itemsDeleted ?? 0
+        } catch { }
+
+        // Volumes: container volume prune
+        do {
+            let volResult: PruneResult = try await executeJSON(
+                PruneResult.self,
+                args: ["volume", "prune", "--format", "json"]
+            )
+            totalReclaimed += volResult.reclaimedSpace ?? 0
+        } catch { }
+
+        return SystemPruneResult(
+            reclaimedSpace: totalReclaimed,
+            imagesDeleted: imagesDeleted,
+            containersDeleted: containersDeleted
+        )
     }
 
     func systemVersion() async throws -> [VersionModel] {

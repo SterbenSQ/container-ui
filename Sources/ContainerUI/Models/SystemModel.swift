@@ -68,15 +68,22 @@ struct ResourceUsageModel: Decodable {
     }
 }
 
-// MARK: - Prune Result (from `system prune --format json`)
+// MARK: - Prune Result (from `image prune / container prune / volume prune --format json`)
 
-struct SystemPruneResult: Decodable {
+struct PruneResult: Decodable {
     let reclaimedSpace: Int64?
-    let imagesDeleted: Int?
-    let containersDeleted: Int?
+    let itemsDeleted: Int?
+}
+
+// MARK: - Aggregated Prune Result
+
+struct SystemPruneResult {
+    let reclaimedSpace: Int64
+    let imagesDeleted: Int
+    let containersDeleted: Int
 
     var reclaimedFormatted: String {
-        guard let bytes = reclaimedSpace, bytes > 0 else { return "0 KB" }
-        return ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+        guard reclaimedSpace > 0 else { return "0 KB" }
+        return ByteCountFormatter.string(fromByteCount: reclaimedSpace, countStyle: .file)
     }
 }
