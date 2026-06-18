@@ -14,27 +14,12 @@ struct ImageRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Icon / spinner / error indicator
-            Group {
-                switch pullState {
-                case .pulling:
-                    ProgressView()
-                        .scaleEffect(0.7)
-                        .frame(width: 24, height: 24)
-                case .failed:
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.red)
-                        .frame(width: 24, height: 24)
-                case .none:
-                    Image(systemName: "photo.stack")
-                        .font(.title2)
-                        .foregroundColor(.purple)
-                }
-            }
+            // Icon badge / spinner / error indicator
+            iconBadge
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(image.isPlaceholder ? image.name : image.shortName)
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
                     .lineLimit(1)
                     .foregroundColor(textColor)
 
@@ -93,6 +78,24 @@ struct ImageRowView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var iconBadge: some View {
+        switch pullState {
+        case .pulling:
+            ProgressView()
+                .scaleEffect(0.7)
+                .frame(width: 40, height: 40)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: DT.smallCardRadius))
+        case .failed:
+            GradientIcon(systemName: "exclamationmark.triangle.fill",
+                         gradient: DT.Gradient.red, size: 40)
+        case .none:
+            GradientIcon(systemName: "photo.stack",
+                         gradient: DT.Gradient.purple, size: 40)
+        }
     }
 
     private var textColor: Color {

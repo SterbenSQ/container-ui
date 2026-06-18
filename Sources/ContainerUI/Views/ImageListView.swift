@@ -10,9 +10,7 @@ struct ImageListView: View {
         VStack(spacing: 0) {
             // Toolbar
             HStack {
-                Text(l10n["image.list.title"])
-                    .font(.largeTitle)
-                    .bold()
+                DT.pageTitle(l10n["image.list.title"])
 
                 Spacer()
 
@@ -46,14 +44,18 @@ struct ImageListView: View {
             .padding(.bottom, 8)
 
             // Search
-            HStack {
+            HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
                 TextField(l10n["image.list.search"], text: $vm.searchText)
                     .textFieldStyle(.plain)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .background(Color(nsColor: .controlBackgroundColor))
+            .clipShape(RoundedRectangle(cornerRadius: DT.smallCardRadius))
+            .padding(.horizontal)
+            .padding(.bottom, 4)
 
             // Image list
             List {

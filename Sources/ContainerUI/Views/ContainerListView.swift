@@ -16,9 +16,7 @@ struct ContainerListView: View {
             VStack(spacing: 0) {
                 // Toolbar
                 HStack {
-                    Text(l10n["container.list.title"])
-                        .font(.largeTitle)
-                        .bold()
+                    DT.pageTitle(l10n["container.list.title"])
 
                     Spacer()
 
@@ -43,14 +41,18 @@ struct ContainerListView: View {
                 .padding()
 
                 // Search bar
-                HStack {
+                HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
                     TextField(l10n["container.list.search"], text: $vm.searchText)
                         .textFieldStyle(.plain)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 12)
                 .padding(.vertical, 8)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: DT.smallCardRadius))
+                .padding(.horizontal)
+                .padding(.bottom, 4)
 
                 // Container list
                 List {

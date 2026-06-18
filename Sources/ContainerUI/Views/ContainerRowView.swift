@@ -6,15 +6,12 @@ struct ContainerRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Status indicator
-            Circle()
-                .fill(statusColor)
-                .frame(width: 10, height: 10)
+            // Status dot with gradient + glow
+            statusDot
 
-            // Container info
             VStack(alignment: .leading, spacing: 2) {
                 Text(container.name)
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
                     .lineLimit(1)
                 Text(container.image)
                     .font(.caption)
@@ -24,7 +21,6 @@ struct ContainerRowView: View {
 
             Spacer()
 
-            // IP address
             if let ip = container.ipAddress {
                 Text(ip)
                     .font(.caption)
@@ -32,21 +28,19 @@ struct ContainerRowView: View {
                     .monospaced()
             }
 
-            // Status badge
+            // Status badge with gradient
             Text(container.state.capitalized)
-                .font(.caption)
+                .font(.caption2.weight(.medium))
                 .padding(.horizontal, 8)
-                .padding(.vertical, 2)
-                .background(statusColor.opacity(0.2))
-                .foregroundColor(statusColor)
+                .padding(.vertical, 3)
+                .foregroundColor(.white)
+                .background(statusGradient)
                 .clipShape(Capsule())
 
-            // Created date
             Text(container.created, style: .date)
                 .font(.caption)
                 .foregroundColor(.secondary)
 
-            // Delete button
             if let onDelete = onDelete {
                 Button {
                     onDelete()
@@ -60,6 +54,22 @@ struct ContainerRowView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private var statusDot: some View {
+        Circle()
+            .fill(statusGradient)
+            .frame(width: 10, height: 10)
+            .shadow(color: statusColor.opacity(0.5), radius: 4)
+    }
+
+    private var statusGradient: LinearGradient {
+        switch container.containerState {
+        case .running: return DT.Gradient.green
+        case .stopped: return DT.Gradient.red
+        case .stopping: return DT.Gradient.orange
+        case .unknown: return LinearGradient(colors: [.gray, .gray.opacity(0.7)], startPoint: .top, endPoint: .bottom)
+        }
     }
 
     private var statusColor: Color {

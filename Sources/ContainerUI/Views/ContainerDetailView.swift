@@ -13,12 +13,13 @@ struct ContainerDetailView: View {
                 if let detail = vm.detail {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(detail.name)
-                            .font(.title)
+                            .font(.system(.title, design: .rounded))
                             .bold()
                         HStack {
                             Circle()
-                                .fill(detail.isRunning ? Color.green : Color.red)
-                                .frame(width: 8, height: 8)
+                                .fill(detail.isRunning ? DT.Gradient.green : DT.Gradient.red)
+                                .frame(width: 10, height: 10)
+                                .shadow(color: (detail.isRunning ? Color.green : Color.red).opacity(0.5), radius: 4)
                             Text(detail.state.capitalized)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
@@ -197,8 +198,7 @@ struct ContainerDetailView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.title3)
-                .bold()
+                .font(.system(.title3, design: .rounded).bold())
                 .foregroundColor(color)
             if !detail.isEmpty {
                 Text(detail)
@@ -209,7 +209,7 @@ struct ContainerDetailView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(color.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipShape(RoundedRectangle(cornerRadius: DT.smallCardRadius))
     }
 
     // MARK: - Logs Tab
